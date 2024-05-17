@@ -5,6 +5,6 @@
 }
 
 body {
-    background: url(https://keheck.github.io/media/bg.webp) center no-repeat fixed;
+    background: url(assets/bg.webp) center no-repeat fixed;
     backdrop-filter: blur(5px);
 }
