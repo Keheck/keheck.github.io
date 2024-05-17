@@ -2,10 +2,11 @@
     font-family: Arial, Helvetica, sans-serif;
     color:white;
     background-color: rgba(1, 1, 1, 0.5);
-    padding: 2%;
+    padding: 5px 5vw 5px 5vw;
 }
 
 body {
     background: url(assets/bg.webp) center no-repeat fixed;
     backdrop-filter: blur(5px);
+    margin: 0;
 }
