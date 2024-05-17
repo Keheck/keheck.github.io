@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How I made this page</title>
+    <style src="./style/main.css"></style>
+</head>
+<body>
+<h1>How I made this page</h1>
+
+<h2>Introduction</h2>
+
+<p>Anyone who has ever dabbled in HTML is probably aware that to make even a basic
+page you need a lot of boilerplate: The tags are lengthy and getting even just
+the header set up requires multiple lines of code. Engineers, however, are
+extremely lazy: If you present them with a problem that is mere busy work, they
+will rather invest multiple hours into an optimized and streamlined process
+instead of taking slightly longer to write the boilerplate. All this was a 
+roundabout way saying that I wanted to find a nice and easy way to concentrate
+on actually writing for my blog, and not having to create so much boilerplate.</p>
+
+<h2>Making the writing process sufferable</h2>
+
+<p>If you've ever been to a GitHub or GitLab repository, or managed a few
+yourself, you might have noticed those mysterious <code>README.md</code> files. the <code>md</code>
+stands for Markdown, a markup language designed to quickly format texts without
+all the boilerplate from HTML. Its extreme simplicity allows for fast typing,
+however, you are quite restricted in styling your files. For example, you can't
+make index tabs, put background images into your pages or stylize the text by
+exchanging fonts mid text or coloring it. It is good enough for READMEs or
+other texts that don't require a lot of stylization.</p>
+
+<p>Markdown is in fact the main language in which these pages are written,
+however, it is not HTML and thus (most likely) not readable by your web
+browser, and I also lose a lot of the amenities aforementioned. If I wanted to
+create a good looking blog though, I needed to find some way to turn my
+Markdown into HTML.</p>
+
+<h2>Turning Markdown into Markup</h2>
+
+<p>As standards go, Markdown is extremely small, featuring only a few formatting
+options. This includes <code>#</code>, <code>##</code> and <code>###</code> for headers, <code>**bold**</code>,
+<code>*italics*</code> and <code>~~strike through~~</code> among other things. I <em>could</em> have written
+my own script turning Markdown into HTML, but again, engineers are lazy. Lucky
+for me, there was a tool: It's called <code>markdown</code>. It takes as an input a 
+Markdown text and prints out the equivalent HTML code. That's the main body
+taken care of, but it doesn't generate the rest of the boilerplate html code
+like the header, or the <code>&lt;body&gt;</code> and <code>&lt;html&gt;</code> tags. Sadly, neither Markdown the
+language nor <code>markdown</code> the tool had any options for including one file in
+another. In the spirit of eliminating boilerplate though, I was determined.</p>
+
+<h2>Eliminating the boilerplate</h2>
+
+<p>Fellow C programmers might know about the glorious C Preprocessor. Its central
+role is in eliminating a lot of boilerplate by declaring functions that another
+file might want to use. The best thing about it is that it doesn't really care
+what the actual contents of the source files are. It only cares about 
+preprocessor directives placed inside that file. The plan was to include
+templates by using the appropriate directive and passing it through the
+preprocessor, however, there were always some preceding lines of the form
+<code># n "some text"...</code>. Aside from just being weird to see, in Markdown, a
+<code># text</code> is a Level 1 heading, not good.</p>
+
+<p>So I was faced with a choice: Sanitize the output, meaning I get rid of any
+erroneous lines, or I could write my own preprocessor. While the latter would
+saved me from this awful rabbit hole, the former one sounded more fun, and I
+plain liked the idea of using the C preprocessor in cursed ways nobody
+intended to. It would also allow me to do more advanced things, like replacing
+any occurrence of a word with a Wikipedia link to that word, or a glossary link.
+Sadly, using the C preprocessor had proven to be overkill. The only use I could
+find was using it in conjunction with a macro to get the title of the page into
+the header of the HTML code. </p>
+
+<h2>Putting it all together</h2>
+
+<p>Finally, to put all the pieces together, I use the tool Make from the Free
+Software Foundation, Inc. to splice together the head, body and foot. At the
+time I'm writing this, it's all the tool really does, but I have plans to also
+add a feature that allows me to do the aforementioned glossary link stuff, and
+maybe other things that come to mind.</p>
+</body>
+</html>
