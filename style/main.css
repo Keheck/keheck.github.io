@@ -1,10 +1,16 @@
-* {
+:not(code) {
     font-family: Arial, Helvetica, sans-serif;
+}
+
+code {
+  background-color: #111;
+  padding: 0.1em 0.3em;
+  border-radius: 0.25em
 }
 
 body>div {
     color:white;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(200, 200, 200, 0.2);
     padding: 15px 2vw 15px 1vw;
     margin: 20px 0;
     border: 0px none red;

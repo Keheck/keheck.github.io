@@ -71,17 +71,117 @@ erroneous lines, or I could write my own preprocessor. While the latter would
 saved me from this awful rabbit hole, the former one sounded more fun, and I
 plain liked the idea of using the C preprocessor in cursed ways nobody
 intended to. It would also allow me to do more advanced things, like replacing
-any occurrence of a word with a Wikipedia link to that word, or a glossary link.
-Sadly, using the C preprocessor had proven to be overkill. The only use I could
-find was using it in conjunction with a macro to get the title of the page into
-the header of the HTML code. </p>
+any occurrence of a word with a Wikipedia link to that word, or a glossary 
+link. Sadly, using the C preprocessor had proven to be overkill. The only use I
+could find was using it in conjunction with a macro to get the title of the 
+page into the header of the HTML code.</p>
 
 <h2>Putting it all together</h2>
 
 <p>Finally, to put all the pieces together, I use the tool Make from the Free
-Software Foundation, Inc. to splice together the head, body and foot. At the
-time I'm writing this, it's all the tool really does, but I have plans to also
-add a feature that allows me to do the aforementioned glossary link stuff, and
-maybe other things that come to mind.</p>
+Software Foundation, Inc. to splice together the head, body and foot,
+construct each webpage from a few boilerplate files and the Markdown file that
+contains the actual article, and then output a single HTML file with everything
+configured correctly. Best of all, if anything changes about my setup it
+automatically rebuilds any pages that need to be built.</p>
+
+<p>Make was originally designed to have easily expandable code projects, by
+defining so called Targets that you could tell Make to run, which means it
+looks at the source code of the target and all its dependencies, and if any
+changes were made since the last time that target was built, it builds the file
+again. <strong>Long story short:</strong> It lets software developers focus on just creating
+their software and not have to worry about how to compile it into a product.
+And if you think about it, this website here is the same right? All I want to
+worry about is just making a website, but there is so much boilerplate to deal
+with, so I just use Make to deal with that for me. But that comfort came with a
+price...</p>
+
+<h2>Something no man was meant to see</h2>
+
+<p>By far the most cursed line of code is in this Makefile for the project. That
+line creates the navigation bar at the top of the website. it looks something
+like this: <br />
+<code>1. echo</code> <br />
+<code>2. $(foreach navgroup,$(NAV_FOLDERS),</code> <br />
+<code>3. "&lt;div class="dropdown"&gt;</code> <br />
+<code>4. &lt;button class="dropbtn"&gt;$(shell head pages/$(navgroup)/.page-info -n
+1)&lt;/button&gt;</code> <br />
+<code>5. &lt;div class="dropdown-content"&gt;$(foreach file,$(shell find pages/$(navgroup)
+-name "*.md"),</code> <br />
+<code>6. &lt;a href=\"https://keheck.github.io/$(navgroup)/$(notdir 
+$(basename $(file)))\"&gt;$(shell head -n 1 $(file))&lt;/a&gt;)</code> <br />
+<code>7. &lt;/div&gt;&lt;/div&gt;")</code> <br />
+<code>8. &gt;&gt; $(BOILERPLATE_DIR)/navbar.html</code> <br />
+The line has been broken up into several for your convenience, and line numbers
+have been added to the front to reference down below in the explanation. In
+reality, all this is one line. Don't worry, I will go over what each line does
+one by one:</p>
+
+<ol>
+<li><code>echo</code>: All it does is output the result of whatever commands follow it, and
+using a structure seen in 8.</li>
+<li><code>$(foreach navgroup,$(NAV_FOLDERS),&lt;something&gt;)</code>: Here, we iterate, or loop,
+over every entry <code>navgroup</code> in a list called <code>NAV_FOLDERS</code>, and do
+<code>&lt;something&gt;</code> with them (that <code>something</code> is what happens between 3. and 7.).
+Each navgroup here represents a category of articles, like "This Page", which
+the article you're reading right now is a part of.</li>
+<li><code>&lt;div class="dropdown"&gt;</code>: Here we create a container that will hold all the
+relevant elements for the category. This is a so called "opening tag", which is
+part of HTML and represents a single element. Elements can contain other
+elements, so we also need to mark the end of this container. That we do with
+the second <code>&lt;/div&gt;</code> in 7.</li>
+<li><code>&lt;button class="dropbtn"&gt;$(shell head pages/$(navgroup)/.page-info -n
+1)&lt;/button&gt;</code>: This part creates a button element that will be used by the user
+to open the menu by overing over it with their cursor. The <code>$(shell head
+pages/$(navgroup)/.page-info -n 1)</code> command tells Make (The utility used to
+build the webpages) to interpret the rest of the parentheses as a shell command
+(aka a terminal command), and replace it with whatever got reported back by
+that command. Here, the <code>head</code> command, with this specific configuration,
+returns the first line of the file it's given, here it's a <code>.page-info</code> file (a
+file format I made up) located in the <code>navgroup</code> directory under <code>pages</code>. It
+simply contains the name of the current category.</li>
+<li><code>&lt;div class="dropdown-content"&gt;$(foreach file,$(shell find pages/$(navgroup)
+-name "*.md"),&lt;something&gt;)</code>: Here we open another group of elements by looping
+over this time the files contained in the <code>pages/\&lt;navgroup\&gt;</code> subdirectory,
+and doing <code>&lt;something&gt;</code> with them. That something is located in 6. The end of
+this container is the first <code>&lt;/div&gt;</code> in 7. You'll notice that we're using
+<code>shell</code> again, this time to find every file in the current directory we're
+looking at ending in <code>.md</code>, which are the Markdown files we want to turn into
+our webpages.</li>
+<li><code>&lt;a href=\"https://keheck.github.io/$(navgroup)/$(notdir 
+$(basename $(file)))\"&gt;$(shell head -n 1 $(file))&lt;/a&gt;)</code>: Finally, we create a
+hyperlink for each file we're looking at, by taking its <code>navgroup</code> and sticking
+the name of the file after that. Since the <code>file</code> variable we're using to loop
+over the files still has the extension and the path to that file, we use
+<code>basename</code> and <code>notdir</code>, which removes the file extension and the directory
+path respectively, leaving only the pure file name. Finally, we get the first
+line of the file, which is just the title of the article, and use that as the
+text to display to the user, because it just makes sense, unlike anything else
+outlined here.</li>
+<li><code>&lt;/div&gt;&lt;/div&gt;</code>: This just closes all the open containers (the one holding
+the) links and the one containing the entire navbar category</li>
+<li><code>&gt;&gt; $(BOILERPLATE_DIR)/navbar.html</code>: Finally, after all this madness, we
+tell our echo command to append everything that resulted from this insanity
+into the navbar file, so that we may include it into every article for us.</li>
+</ol>
+
+<p>To those asking the question: Yes, this is absolutely horrendous. Yes, I could
+have made it easier and no, this is not what you're dealing with when you
+write Makefiles. As I said, GNU Make was built to make <strong>software</strong> projects
+easier. That means its only job is to call other tools that actually build the
+files. But here I'm using Make <strong>as the tool that builds the pages</strong>, so it's
+no wonder that it ends up cursed.</p>
+
+<h2>Conclusion</h2>
+
+<p>And that is the way I created this website. To the layperson, it may seem quite
+complex, and yeah I suppose it kind of is, especially when reading it from
+someone like me. Who knows, maybe some day I'll create some more pages that go
+more in depth about a specific topic mentioned here. But you can expect some
+other, more serious topics as well, there are some ideas I would like to play
+around with. See this as a kind of experiment to my... carreer? as a software
+blogger. Until next time...</p>
+
+<h1>Thank you for reading!</h1>
 </div>
 </body></html>
